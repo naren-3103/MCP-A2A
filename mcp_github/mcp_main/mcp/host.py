@@ -1,3 +1,6 @@
+import mlflow
+from datetime import datetime
+
 class MCPHost:
     def __init__(self, tools):
         self.tools = {tool.name: tool for tool in tools}
@@ -10,22 +13,55 @@ class MCPHost:
         })
 
     def run(self, agent):
-        while True:
-            decision = agent.decide(self.context)
+        mlflow.set_experiment("mcp_agent_execution")
 
-            if "final" in decision:
-                print("\n✅ FINAL ANSWER:\n")
-                print(decision["final"])
-                break
-
-            tool_call = decision["tool_call"]
-            tool = self.tools[tool_call["name"]]
-
-            print(f"\n🔧 MCP executing tool: {tool.name}")
-
-            result = tool.run(tool_call["input"])
-
-            self.add_message(
-                role="tool",
-                content=f"Tool {tool.name} output:\n{result}"
+        with mlflow.start_run(run_name=f"mcp_run_{datetime.now()}"):
+            # Log initial user prompt
+            mlflow.log_param(
+                "initial_user_message",
+                self.context[0]["content"]
             )
+
+            step = 0
+
+            while True:
+                decision = agent.decide(self.context)
+
+                if "final" in decision:
+                    mlflow.log_metric("steps", step)
+                    mlflow.log_text(
+                        decision["final"],
+                        artifact_file="final_answer.txt"
+                    )
+
+                    print("\n✅ FINAL ANSWER:\n")
+                    print(decision["final"])
+                    break
+
+                tool_call = decision["tool_call"]
+                tool_name = tool_call["name"]
+                tool_input = tool_call["input"]
+
+                mlflow.log_param(f"tool_{step}_name", tool_name)
+                mlflow.log_dict(
+                    tool_input,
+                    artifact_file=f"tool_{step}_input.json"
+                )
+
+                tool = self.tools[tool_name]
+
+                print(f"\n🔧 MCP executing tool: {tool_name}")
+
+                result = tool.run(tool_input)
+
+                mlflow.log_text(
+                    result,
+                    artifact_file=f"tool_{step}_output.txt"
+                )
+
+                self.add_message(
+                    role="tool",
+                    content=f"Tool {tool_name} output:\n{result}"
+                )
+
+                step += 1

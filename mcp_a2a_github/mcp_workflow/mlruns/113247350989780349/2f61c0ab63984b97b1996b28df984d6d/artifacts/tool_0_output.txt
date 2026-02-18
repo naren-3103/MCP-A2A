@@ -1,0 +1,1 @@
+Model Context Protocol (MCP) standardizes how AI models interact with tools and data.

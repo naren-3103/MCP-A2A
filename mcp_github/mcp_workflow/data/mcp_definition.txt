@@ -1,0 +1,1 @@
+MCP defines a strict separation between reasoning and execution.

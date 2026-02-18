@@ -22,6 +22,7 @@ If a document needs to be read, respond ONLY with JSON:
 
 Otherwise respond:
 {{ "final": "<your answer>" }}
+The final answer should be in points - at max 3 points
 """
 
         response = ollama.chat(

@@ -15,7 +15,7 @@ host.add_message(
     role="user",
     content=(
         "Read the document at path data/sample_doc.txt "
-        "and explain what MCP is."
+        "and explain what MCP is and why it is used."
     )
 )
 

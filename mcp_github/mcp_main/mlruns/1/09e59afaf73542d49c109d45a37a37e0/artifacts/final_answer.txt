@@ -1,1 +1,0 @@
-The Model Context Protocol (MCP) is a practical framework designed to make interactions between language models and external systems both reliable and scalable.
